@@ -1,0 +1,192 @@
+// 1. Access Mic Using JavaScript and Convert Speech to Text
+function accessMic() {
+    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.lang = 'en-US';
+    recognition.start();
+
+    recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        console.log(`You said: ${transcript}`);
+    };
+
+    recognition.onerror = (event) => {
+        console.error(`Error occurred: ${event.error}`);
+    };
+}
+
+// Example usage
+// accessMic();
+
+// 2. Access Camera Using JavaScript and Click Photo
+function accessCamera() {
+    const video = document.createElement('video');
+    const canvas = document.createElement('canvas');
+    const button = document.createElement('button');
+    button.innerText = 'Capture Photo';
+    document.body.append(video, button, canvas);
+
+    navigator.mediaDevices.getUserMedia({ video: true })
+        .then((stream) => {
+            video.srcObject = stream;
+            video.play();
+
+            button.addEventListener('click', () => {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                canvas.getContext('2d').drawImage(video, 0, 0);
+                const image = canvas.toDataURL('image/png');
+                console.log(image); // Base64 encoded image
+            });
+        })
+        .catch(console.error);
+}
+
+// Example usage
+// accessCamera();
+
+// 3. Do Live Stream of Camera Using JavaScript
+function liveStreamCamera() {
+    const video = document.createElement('video');
+    document.body.append(video);
+
+    navigator.mediaDevices.getUserMedia({ video: true })
+        .then((stream) => {
+            video.srcObject = stream;
+            video.play();
+        })
+        .catch(console.error);
+}
+
+// Example usage
+// liveStreamCamera();
+
+// 4. Record Video and Post to Instagram (Conceptual)
+function recordVideo() {
+    const video = document.createElement('video');
+    const recordButton = document.createElement('button');
+    recordButton.innerText = 'Record';
+    const stopButton = document.createElement('button');
+    stopButton.innerText = 'Stop';
+    document.body.append(video, recordButton, stopButton);
+
+    let mediaRecorder;
+    let chunks = [];
+
+    navigator.mediaDevices.getUserMedia({ video: true })
+        .then((stream) => {
+            video.srcObject = stream;
+            video.play();
+
+            recordButton.addEventListener('click', () => {
+                mediaRecorder = new MediaRecorder(stream);
+                mediaRecorder.start();
+
+                mediaRecorder.ondataavailable = (event) => {
+                    chunks.push(event.data);
+                };
+
+                mediaRecorder.onstop = () => {
+                    const blob = new Blob(chunks, { type: 'video/mp4' });
+                    const formData = new FormData();
+                    formData.append('file', blob);
+
+                    // Post to Instagram (Requires API integration)
+                    fetch('https://api.instagram.com/upload', {
+                        method: 'POST',
+                        body: formData,
+                    }).then(console.log).catch(console.error);
+                };
+            });
+
+            stopButton.addEventListener('click', () => {
+                mediaRecorder.stop();
+            });
+        })
+        .catch(console.error);
+}
+
+// Example usage
+// recordVideo();
+
+// 5. Search Any Name in Google and Create Search Engine
+function customSearchEngine(query) {
+    fetch(`https://www.googleapis.com/customsearch/v1?q=${query}&key=YOUR_API_KEY&cx=YOUR_CX`)
+        .then(response => response.json())
+        .then(data => {
+            data.items.forEach(item => {
+                console.log(`${item.title}: ${item.link}`);
+            });
+        })
+        .catch(console.error);
+}
+
+// Example usage
+// customSearchEngine('example name');
+
+// 6. Connect JavaScript with ChatGPT and Use Mic Input
+async function chatWithGPT() {
+    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.lang = 'en-US';
+    recognition.start();
+
+    recognition.onresult = async (event) => {
+        const userInput = event.results[0][0].transcript;
+        console.log(`User said: ${userInput}`);
+
+        const response = await fetch('https://api.openai.com/v1/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer YOUR_API_KEY`,
+            },
+            body: JSON.stringify({
+                model: 'text-davinci-003',
+                prompt: userInput,
+                max_tokens: 150,
+            }),
+        });
+
+        const result = await response.json();
+        console.log(`ChatGPT Response: ${result.choices[0].text}`);
+    };
+
+    recognition.onerror = (event) => {
+        console.error(`Error: ${event.error}`);
+    };
+}
+
+// Example usage
+// chatWithGPT();
+
+// 7. Create Graph of Docker Metrics Using JavaScript
+function displayDockerMetrics() {
+    const data = {
+        labels: ['Memory Used', 'CPU Usage', 'Storage Used'],
+        datasets: [{
+            label: 'Docker Metrics',
+            data: [50, 30, 70], // Example data
+            backgroundColor: ['rgba(75, 192, 192, 0.2)', 'rgba(255, 159, 64, 0.2)', 'rgba(153, 102, 255, 0.2)'],
+            borderColor: ['rgba(75, 192, 192, 1)', 'rgba(255, 159, 64, 1)', 'rgba(153, 102, 255, 1)'],
+            borderWidth: 1,
+        }],
+    };
+
+    const config = {
+        type: 'bar',
+        data,
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                },
+            },
+        },
+    };
+
+    const canvas = document.createElement('canvas');
+    document.body.append(canvas);
+    new Chart(canvas.getContext('2d'), config);
+}
+
+// Example usage
+// displayDockerMetrics();
