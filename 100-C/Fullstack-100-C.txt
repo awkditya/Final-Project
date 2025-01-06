@@ -1,0 +1,134 @@
+// Full Stack JavaScript Tasks
+
+// 1. Access Mic and Convert Speech to Text
+async function accessMic() {
+    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.lang = 'en-US';
+    recognition.start();
+
+    recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        console.log("You said:", transcript);
+        document.getElementById('mic-output').innerText = transcript;
+    };
+
+    recognition.onerror = (event) => {
+        console.error("Error accessing mic:", event.error);
+    };
+}
+
+// 2. Access Camera and Click Photo
+async function accessCamera() {
+    const video = document.getElementById('camera-stream');
+    const canvas = document.getElementById('photo-canvas');
+    const context = canvas.getContext('2d');
+
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    video.srcObject = stream;
+
+    document.getElementById('capture-button').addEventListener('click', () => {
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const photo = canvas.toDataURL('image/png');
+        console.log("Photo captured:", photo);
+    });
+}
+
+// 3. Live Stream Camera
+async function liveStreamCamera() {
+    const video = document.getElementById('live-stream');
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    video.srcObject = stream;
+    video.play();
+}
+
+// 4. Record Video and Post to Instagram
+async function recordVideo() {
+    const video = document.getElementById('record-stream');
+    const mediaRecorder = new MediaRecorder(await navigator.mediaDevices.getUserMedia({ video: true }));
+    const chunks = [];
+
+    mediaRecorder.ondataavailable = (event) => chunks.push(event.data);
+    mediaRecorder.onstop = async () => {
+        const blob = new Blob(chunks, { type: 'video/mp4' });
+        const formData = new FormData();
+        formData.append('file', blob, 'recording.mp4');
+
+        // Post to Instagram (API integration required)
+        console.log("Posting to Instagram...");
+        // await fetch('https://api.instagram.com/upload', { method: 'POST', body: formData });
+    };
+
+    video.srcObject = await navigator.mediaDevices.getUserMedia({ video: true });
+    mediaRecorder.start();
+
+    setTimeout(() => mediaRecorder.stop(), 10000); // Record for 10 seconds
+}
+
+// 5. Create a Search Engine
+async function customSearchEngine(query) {
+    const response = await fetch(`https://www.googleapis.com/customsearch/v1?q=${query}&key=YOUR_API_KEY&cx=YOUR_CX`);
+    const data = await response.json();
+
+    const links = data.items.map(item => item.link);
+    console.log("Search Results:", links);
+    document.getElementById('search-results').innerHTML = links.map(link => `<a href="${link}">${link}</a>`).join('<br>');
+}
+
+// 6. Connect to ChatGPT and Use Mic Input
+async function chatWithGPT() {
+    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.lang = 'en-US';
+    recognition.start();
+
+    recognition.onresult = async (event) => {
+        const userInput = event.results[0][0].transcript;
+        console.log("User Input:", userInput);
+
+        const response = await fetch('https://api.openai.com/v1/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer YOUR_API_KEY`
+            },
+            body: JSON.stringify({
+                model: "text-davinci-003",
+                prompt: userInput,
+                max_tokens: 150
+            })
+        });
+
+        const data = await response.json();
+        console.log("ChatGPT Response:", data.choices[0].text);
+        document.getElementById('gpt-output').innerText = data.choices[0].text;
+    };
+
+    recognition.onerror = (event) => {
+        console.error("Mic error:", event.error);
+    };
+}
+
+// 7. Docker Metrics Graph
+async function showDockerMetrics() {
+    const response = await fetch('/docker-metrics'); // Replace with your backend endpoint
+    const metrics = await response.json();
+
+    const ctx = document.getElementById('docker-metrics-chart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: Object.keys(metrics),
+            datasets: [{
+                label: 'Docker Metrics',
+                data: Object.values(metrics),
+                backgroundColor: ['rgba(75, 192, 192, 0.2)'],
+                borderColor: ['rgba(75, 192, 192, 1)'],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+}
